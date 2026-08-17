@@ -1,85 +1,100 @@
-// ============================================
-// SomaSmart — API Logic (api.js)
-// ============================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SomaSmart — AI Exam Solver</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
 
-const CONFIG = {
-  model: "claude-sonnet-4-6",
-  max_tokens: 1000,
-  endpoint: "https://api.anthropic.com/v1/messages",
-};
+  <!-- AURORA BACKGROUND -->
+  <canvas id="aurora"></canvas>
 
-function buildPrompt(question, level, subject) {
-  return `You are SomaSmart — an expert exam tutor for Kenyan students.
-Solve this ${level} ${subject} question step by step.
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-logo">Soma<span>Smart</span></div>
+    <div class="nav-badge">Free · No Login</div>
+  </nav>
 
-Question: ${question}
+  <!-- MAIN CONTENT -->
+  <main class="hero">
+    <div class="hero-content">
 
-Rules:
-1. Start with: ✅ Topic: [topic name]
-2. Number every step clearly
-3. Show all working and formulas
-4. State the final answer clearly
-5. End with: 💡 Exam Tip: [one useful tip]
-6. Use simple English
-7. Be concise but complete`;
-}
+      <div class="hero-tag">🇰🇪 Built for Kenyan Students</div>
 
-function validateInput(question) {
-  if (!question || question.trim() === "") {
-    return { isValid: false, error: "Please paste your question first." };
-  }
-  if (question.trim().length < 10) {
-    return { isValid: false, error: "Question is too short. Paste the full question." };
-  }
-  if (question.trim().length > 3000) {
-    return { isValid: false, error: "Too long. Paste one question at a time." };
-  }
-  return { isValid: true, error: null };
-}
+      <h1 class="hero-title">
+        Solve any past paper<br/>question in seconds
+      </h1>
 
-async function solveQuestion(question, level, subject) {
-  const validation = validateInput(question);
-  if (!validation.isValid) {
-    return { success: false, error: validation.error };
-  }
+      <p class="hero-sub">
+        Paste your KCSE or university question — AI explains it
+        step by step, like a personal tutor. Free. No account needed.
+      </p>
 
-  try {
-    const response = await fetch(CONFIG.endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: CONFIG.model,
-        max_tokens: CONFIG.max_tokens,
-        messages: [
-          {
-            role: "user",
-            content: buildPrompt(question, level, subject),
-          },
-        ],
-      }),
-    });
+      <!-- LEVEL SELECTOR -->
+      <div class="level-selector">
+        <button class="level-btn active" data-level="KCSE">KCSE</button>
+        <button class="level-btn" data-level="University">University</button>
+        <button class="level-btn" data-level="Primary">Primary</button>
+      </div>
 
-    if (!response.ok) {
-      if (response.status === 429) return { success: false, error: "Too many requests. Wait a moment and try again." };
-      if (response.status === 401) return { success: false, error: "API key error. Contact support." };
-      return { success: false, error: `Error ${response.status}. Please try again.` };
-    }
+      <!-- INPUT CARD -->
+      <div class="input-card">
 
-    const data = await response.json();
-    const answer = data.content
-      .filter((block) => block.type === "text")
-      .map((block) => block.text)
-      .join("\n");
+        <!-- SUBJECT BUTTONS -->
+        <div class="subject-grid">
+          <button class="subject-btn active" data-subject="Mathematics">📐 Maths</button>
+          <button class="subject-btn" data-subject="Biology">🧬 Biology</button>
+          <button class="subject-btn" data-subject="Chemistry">⚗️ Chemistry</button>
+          <button class="subject-btn" data-subject="Physics">⚡ Physics</button>
+          <button class="subject-btn" data-subject="History">📜 History</button>
+          <button class="subject-btn" data-subject="English">📝 English</button>
+        </div>
 
-    if (!answer) return { success: false, error: "Empty response. Please try again." };
+        <!-- QUESTION TEXTAREA -->
+        <textarea
+          id="question-input"
+          class="question-input"
+          placeholder="Paste your exam question here...
 
-    return { success: true, answer };
+e.g. 2022 KCSE Maths P1 Q3: A rectangular plot measures
+120m by 80m. Find the length of the diagonal. (3 marks)"
+          rows="5"
+        ></textarea>
 
-  } catch (error) {
-    return { success: false, error: "Network error. Check your internet and try again." };
-  }
-}
+        <!-- ERROR MESSAGE -->
+        <div class="error-msg" id="error-msg"></div>
 
-window.SomaSmart = { solveQuestion };
+        <!-- SOLVE BUTTON -->
+        <button class="solve-btn" id="solve-btn">
+          <span id="btn-text">✨ Solve & Explain</span>
+          <span id="btn-spinner" class="spinner hidden"></span>
+        </button>
+
+      </div>
+
+      <!-- ANSWER CARD (hidden until answer arrives) -->
+      <div class="answer-card hidden" id="answer-card">
+        <div class="answer-header">
+          <span>✅ Step-by-step Solution</span>
+        </div>
+        <div class="answer-body" id="answer-body"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>SomaSmart · Free AI tutor for Kenyan students · Built by Brian Murithi</p>
+  </footer>
+
+  <!-- SCRIPTS — order matters -->
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
