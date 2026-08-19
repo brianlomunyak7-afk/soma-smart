@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://brian:secret@db:5432/studentsdb
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: brian
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: studentsdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:
